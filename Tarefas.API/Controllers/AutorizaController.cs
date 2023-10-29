@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using Tarefas.API.DTO;
 
@@ -23,13 +24,24 @@ namespace Tarefas.API.Controllers
 			_configuration = configuration;
 		}
 
-		[HttpGet]
-		public ActionResult<string> Get()
-		{
-			return "AutorizaController:: Acessado em : " + DateTime.Now;
-		}
+		/// <summary>
+		/// registra um novo usuário para acessar a API
+		/// </summary>
+		/// <param name="UsuarioDTO"></param>
+		/// <remarks>
+		/// Exemplo de Requisicao:
+		/// {
+		///  "email": "exemplo@exemplo.com",
+		///  "password": "T3$te1",
+		///  "confirmPassword": ""T3$te1"
+		///}
+		/// </remarks>
+		/// <returns>Status 200</returns>
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[HttpPost("register")]
-		public async Task<ActionResult> Register([FromBody] UsuariosDTO model)
+		public async Task<ActionResult> RegistraUsuario([FromBody] UsuariosDTO model)
 		{
 			if (!ModelState.IsValid)
 			{
@@ -53,6 +65,23 @@ namespace Tarefas.API.Controllers
 			await _signInManager.SignInAsync(user, isPersistent: false);
 			return Ok(model);
 		}
+
+		/// <summary>
+		/// Gera o Token necessario para acessar a API através do botao Authorize. 
+		/// </summary>
+		/// <param name="UsuarioDTO"></param>
+		/// <remarks>
+		/// Exemplo de Requisicao:
+		/// {
+		///  "email": "exemplo@exemplo.com",
+		///  "password": "T3$te1",
+		///  "confirmPassword": ""T3$te1"
+		///}
+		/// </remarks>
+		/// <returns>Status 200</returns>
+		[Produces("application/json")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[HttpPost("login")]
 		public async Task<ActionResult> Login([FromBody] UsuariosDTO userInfo)
 		{
@@ -86,10 +115,18 @@ namespace Tarefas.API.Controllers
 			var expiracao = _configuration["TokenConfiguration:ExpireHours"];
 			var _expiracao = DateTime.UtcNow.AddHours(double.Parse(expiracao));
 
-			//classe que representa um token JWT e gera o token
+			var claims = new[]
+			{
+				new Claim("Usuario", userInfo.email),
+				new Claim(JwtRegisteredClaimNames.UniqueName, userInfo.email),
+				new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())				
+			};
+
+			//classe que representa um token JWT
 			JwtSecurityToken token = new JwtSecurityToken(
-				issuer: _configuration["TokenConfiguration:Audience"],
+				issuer: _configuration["TokenConfiguration:Issuer"],
 				audience: _configuration["TokenConfiguration:Audience"],
+				claims: claims,
 				expires: _expiracao,
 				signingCredentials: credenciais);
 			return new UsuarioToken()

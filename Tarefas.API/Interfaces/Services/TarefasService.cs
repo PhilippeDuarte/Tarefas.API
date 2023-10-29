@@ -43,5 +43,11 @@ namespace Tarefas.API.Interfaces.Services
 			_context.Tarefas.Add(entity);
 			_context.SaveChanges();
 		}
+
+		public bool verificaPermissaoUsuarioTarefa(int tarefaId, string usuario)
+		{
+			var result = _context.Tarefas.Where(t => t.TarefaId == tarefaId).Where(u=> u.Usuario== usuario);
+			return result.Count() > 0 ? true : false;
+		}
 	}
 }
