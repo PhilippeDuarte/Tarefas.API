@@ -1,12 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using SQLitePCL;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
-using Tarefas.API.DTO;
 using Tarefas.API.Interfaces;
 using Tarefas.API.Models;
 
@@ -19,10 +13,14 @@ namespace Tarefas.API.Controllers
 	{
 		private readonly ITarefas _tarefas;
 		private readonly IConfiguration _configuration;
-		public TarefasController(ITarefas tarefas, IConfiguration configuration)
+		private readonly IDecripta _decripta;
+		private readonly ILogger _logger;
+		public TarefasController(ITarefas tarefas, IConfiguration configuration, IDecripta decripta, ILogger logger)
 		{
 			_tarefas = tarefas;
 			_configuration = configuration;
+			_decripta = decripta;
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -67,7 +65,14 @@ namespace Tarefas.API.Controllers
 		/// Inclui uma nova tarefa
 		/// </summary>
 		/// <param name="tarefa"></param>
-		/// 
+		/// <remarks>
+		///		Exemplo de Requisicao:
+		///		{
+		///			"titulo": "Teste Validacao usuario 1",
+		///			"descricao": "Teste Validacao usuario tarefa 1",
+		///			"dataCriacao": "2023-10-29T20:32:31.954",
+		///			"status": 1
+		///		}
 		/// <returns>Status 200</returns>
 		[Produces("application/json")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
@@ -75,7 +80,7 @@ namespace Tarefas.API.Controllers
 		[HttpPost]
 		public ActionResult<Tarefa> Post(Tarefa tarefa)
 		{
-			string usuario = GetName(Request.Headers["Authorization"]);
+			string usuario = _decripta.DecriptaUsuario(Request.Headers["Authorization"]);
 			if (tarefa == null)
 			{
 				return BadRequest();
@@ -112,7 +117,7 @@ namespace Tarefas.API.Controllers
 			{
 				return BadRequest("Não foi possível encontrar a tarefa solicitada.");
 			}
-			string usuario = GetName(Request.Headers["Authorization"]);
+			string usuario = _decripta.DecriptaUsuario(Request.Headers["Authorization"]);
 			if (_tarefas.verificaPermissaoUsuarioTarefa(tarefa.TarefaId, usuario))
 			{
 				tarefa.Usuario = usuario;
@@ -139,7 +144,7 @@ namespace Tarefas.API.Controllers
 		[HttpDelete]
 		public ActionResult Delete(int id)
 		{
-			string usuario = GetName(Request.Headers["Authorization"]);
+			string usuario = _decripta.DecriptaUsuario(Request.Headers["Authorization"]);
 			if (_tarefas.verificaPermissaoUsuarioTarefa(id, usuario))
 			{
 				var result = _tarefas.ObterPorId(id);
@@ -170,7 +175,7 @@ namespace Tarefas.API.Controllers
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[HttpGet("ObterTarefasPorStatus")]
-		public ActionResult<IEnumerable<Tarefa>> ObterTarefaPorStatus([FromHeader] EnumStatus status)
+		public ActionResult<IEnumerable<Tarefa>> ObterTarefasPorStatus([FromHeader] EnumStatus status)
 		{
 			var result = _tarefas.obterTarefasPorStatus(status);
 			if (result == null)
@@ -178,23 +183,6 @@ namespace Tarefas.API.Controllers
 				return BadRequest("Não existem tarefas com o Status selecionado.");
 			}
 			return Ok(result);
-		}
-
-		private string GetName(string header)
-		{
-			string token = header.Split().Last();
-			string secret = _configuration["Jwt:key"];
-			var key = Encoding.UTF8.GetBytes(secret);
-			var handler = new JwtSecurityTokenHandler();
-			var validations = new TokenValidationParameters
-			{
-				ValidateIssuerSigningKey = true,
-				IssuerSigningKey = new SymmetricSecurityKey(key),
-				ValidateIssuer = false,
-				ValidateAudience = false
-			};
-			var claims = handler.ValidateToken(token, validations, out var tokenSecure);
-			return claims.Identity.Name;
 		}
 	}
 }

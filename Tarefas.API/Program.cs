@@ -56,6 +56,7 @@ builder.Services.AddSwaggerGen(c =>
 
 //Configuração de Interfaces
 builder.Services.AddTransient<ITarefas, TarefasService>();
+builder.Services.AddTransient<IDecripta, DecriptaService>();
 
 //Configuração do Banco de Dados
 builder.Services.AddDbContext<AppDbContext>();
