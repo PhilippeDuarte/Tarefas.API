@@ -39,7 +39,7 @@ namespace Tarefas.API.Controllers
 		[Produces("application/json")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		[HttpPost("register")]
+		[HttpPost("RegistraUsuario")]
 		public async Task<ActionResult> RegistraUsuario([FromBody] UsuariosDTO model)
 		{
 			if (!ModelState.IsValid)
