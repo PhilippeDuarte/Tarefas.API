@@ -6,45 +6,49 @@ namespace Tarefas.API.Interfaces.Services
 	public class TarefasService : ITarefas
 	{
 		private AppDbContext _context;
+		public TarefasService()
+		{
+
+		}
 		public TarefasService(AppDbContext context)
 		{
 			_context = context;
 		}
 
-		public void Atualizar(Tarefa entity)
+		public virtual void Atualizar(Tarefa entity)
 		{
 			_context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 			_context.SaveChanges();
 		}
 
-		public void Excluir(Tarefa entity)
+		public virtual void Excluir(Tarefa entity)
 		{
 			_context.Tarefas.Remove(entity);
 			_context.SaveChanges();
 		}
 
-		public Tarefa ObterPorId(int id)
+		public virtual Tarefa ObterPorId(int id)
 		{
 			return _context.Tarefas.FirstOrDefault(t => t.TarefaId == id);
 		}
 
-		public IEnumerable<Tarefa> obterTarefasPorStatus(EnumStatus status)
+		public virtual IEnumerable<Tarefa> ObterTarefasPorStatus(EnumStatus status)
 		{
 			return _context.Tarefas.Where(s=> s.Status== status).ToList();
 		}
 
-		public IEnumerable<Tarefa> ObterTodos()
+		public virtual IEnumerable<Tarefa> ObterTodos()
 		{
 			return _context.Tarefas.ToList();
 		}
 
-		public void SalvarNovo(Tarefa entity)
+		public virtual void SalvarNovo(Tarefa entity)
 		{
 			_context.Tarefas.Add(entity);
 			_context.SaveChanges();
 		}
 
-		public bool verificaPermissaoUsuarioTarefa(int tarefaId, string usuario)
+		public virtual bool verificaPermissaoUsuarioTarefa(int tarefaId, string usuario)
 		{
 			var result = _context.Tarefas.Where(t => t.TarefaId == tarefaId).Where(u=> u.Usuario== usuario);
 			return result.Count() > 0 ? true : false;

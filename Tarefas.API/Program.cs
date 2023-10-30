@@ -8,9 +8,10 @@ using System.Text;
 using Tarefas.API.Context;
 using Tarefas.API.Interfaces;
 using Tarefas.API.Interfaces.Services;
+using Tarefas.API.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
-
+ILoggerFactory loggerFactory;
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -91,7 +92,10 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
-
+//loggerFactory.AddProvider(new CustomLoggerProvider(new CustomLoggerPrividerConfiguration
+//{
+//	LogLevel = LogLevel.Information
+//}));
 app.UseHttpsRedirection();
 
 //Adiciona os middlewares de autenticação e autorização

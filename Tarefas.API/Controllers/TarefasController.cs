@@ -14,13 +14,12 @@ namespace Tarefas.API.Controllers
 		private readonly ITarefas _tarefas;
 		private readonly IConfiguration _configuration;
 		private readonly IDecripta _decripta;
-		private readonly ILogger _logger;
-		public TarefasController(ITarefas tarefas, IConfiguration configuration, IDecripta decripta, ILogger logger)
+		private readonly ILogger<TarefasController> _logger;
+		public TarefasController(ITarefas tarefas, IConfiguration configuration, IDecripta decripta)
 		{
 			_tarefas = tarefas;
 			_configuration = configuration;
 			_decripta = decripta;
-			_logger = logger;
 		}
 
 		/// <summary>
@@ -73,6 +72,8 @@ namespace Tarefas.API.Controllers
 		///			"dataCriacao": "2023-10-29T20:32:31.954",
 		///			"status": 1
 		///		}
+		///	</remarks>
+		///	
 		/// <returns>Status 200</returns>
 		[Produces("application/json")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
@@ -177,7 +178,7 @@ namespace Tarefas.API.Controllers
 		[HttpGet("ObterTarefasPorStatus")]
 		public ActionResult<IEnumerable<Tarefa>> ObterTarefasPorStatus([FromHeader] EnumStatus status)
 		{
-			var result = _tarefas.obterTarefasPorStatus(status);
+			var result = _tarefas.ObterTarefasPorStatus(status);
 			if (result == null)
 			{
 				return BadRequest("Não existem tarefas com o Status selecionado.");
