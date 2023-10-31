@@ -30,7 +30,7 @@ namespace Tarefas.API.Controllers
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		[Produces("application/json")]
-		[HttpGet]
+		[HttpGet("ObterTodasASTarefas")]
 		public ActionResult<IEnumerable<Tarefa>> ObterTodasAsTarefas()
 		{
 			var result = _tarefas.ObterTodos();
@@ -49,7 +49,7 @@ namespace Tarefas.API.Controllers
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		[Produces("application/json")]
-		[HttpGet("{id:int}")]
+		[HttpGet("ObterTarefasPorId")]
 		public ActionResult<Tarefa> ObterTarefaPorId(int id)
 		{
 			Tarefa result = _tarefas.ObterPorId(id);
@@ -78,7 +78,7 @@ namespace Tarefas.API.Controllers
 		[Produces("application/json")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		[HttpPost]
+		[HttpPost("CriarTarefa")]
 		public ActionResult<Tarefa> Post(Tarefa tarefa)
 		{
 			string usuario = _decripta.DecriptaUsuario(Request.Headers["Authorization"]);
@@ -110,7 +110,7 @@ namespace Tarefas.API.Controllers
 		[Produces("application/json")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-		[HttpPut]
+		[HttpPut("AlterarTarefa")]
 		public ActionResult<Tarefa> Put(Tarefa tarefa)
 		{
 			var result = _tarefas.ObterPorId(tarefa.TarefaId);
@@ -142,7 +142,7 @@ namespace Tarefas.API.Controllers
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		[HttpDelete]
+		[HttpDelete("ExcluirTarefa")]
 		public ActionResult Delete(int id)
 		{
 			string usuario = _decripta.DecriptaUsuario(Request.Headers["Authorization"]);
